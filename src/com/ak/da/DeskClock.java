@@ -5,8 +5,19 @@
  */
 package com.ak.da;
 
+import com.ak.da.model.IpInformation;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -117,6 +128,37 @@ public class DeskClock extends Application {
                 
                 time.setText(sdf.format(cal.getTime()));
             }
+        }.start();
+        
+        new AnimationTimer(){
+            @Override
+            public void handle(long now) {
+                try {
+                    URL whatismyip = new URL("http://freegeoip.net/json/");
+                    BufferedReader in = new BufferedReader(new InputStreamReader(
+                            whatismyip.openStream()));
+                    
+                    String gsonLine = in.readLine(); //you get the IP as a String
+
+                    Gson gson = new GsonBuilder()
+                            .disableHtmlEscaping()
+                            .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                            .setPrettyPrinting()
+                            .serializeNulls()
+                            .create();
+                    IpInformation IPDetails= new Gson().fromJson(gsonLine, IpInformation.class);
+                    
+                    System.out.println(
+                            IPDetails.toString() + IPDetails.getCountry_name()
+                    );
+                    
+                } catch (MalformedURLException ex) {
+                    
+                } catch (IOException ex) {
+                    
+                }
+            }
+            
         }.start();
         
        rootGroup.getChildren().addAll(hBox);
